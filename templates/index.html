@@ -1,36 +1,53 @@
 {% extends "bootstrap/base.html" %}
+
 {% block title %}Cashflow Cookbook{% endblock %}
 
 {% block navbar %}
-<link type="text/css" rel="stylesheet" href="/static/style.css"/>
-{% set menu_items = ["Home", "About", "Articles", "Book"] %}
-<nav class="navbar navbar-static-top nav_width">
-  <div class="container-fullwidth ">
-    <ul class="nav navbar-nav">
-    {% for item in menu_items %}
-    <li>
-    {% if item == "Articles" %}
-    <div class="dropdown">
-        <button class="dropbtn" >{{ item }}
-        </button>
 
-        <div class="dropdown-content">
-        <a href="#">Car</a>
-        <a href="#">Home</a>
-        <a href="#">Lifestyle</a>
-        </div> 
+<link type="text/css" rel="stylesheet" href="/static/style.css"/>
+
+{% set menu_items = ["Home", "About", "Articles", "Book"] %}
+{% set account = ["Sign Up", "Login"] %}
+
+<nav class="navbar navbar-static-top nav_width">
+    <div class="container-fullwidth ">
+        <ul class="nav navbar-nav navbar-left">
+        {% for item in menu_items %}
+            <li>
+            {% if item == "Articles" %}
+            <div class="dropdown">
+                <button class="dropbtn" >{{ item }}</button>
+                <div class="dropdown-content">
+                    <a href="#">Car</a>
+                    <a href="#">Home</a>
+                    <a href="#">Lifestyle</a>
+                </div> 
+            </div>
+            {% else %}
+            <div class="dropdown">
+                <button class="dropbtn" >{{ item }}</button>
+            </div>
+            {% endif %}
+        </li>
+        {% endfor %}
+        </ul>
+        <ul class="nav navbar-nav navbar-right"> 
+        {% for item in account %}
+            <li>
+            <div class="dropdown">
+                <!-- Need right padding because of bootstrap navbar right bug -->
+                {% if item=="Login" %}
+                <button class="dropbtn" style="padding-right: 30px">{{item}}</button>
+                {% else %}
+                <button class="dropbtn">{{item}}</button>
+                {% endif %}
+            </div>
+            </li>
+        {% endfor %}
+        </ul>
     </div>
-    {% else %}
-    <div class="dropdown">
-        <button class="dropbtn" >{{ item }}
-        </button>
-</div>
-    {% endif %}
-    </li>
-    {% endfor %}
-    </ul>
-</div>
 </nav>
+
 {% endblock %}
 
 {% block content %}

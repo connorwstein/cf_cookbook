@@ -1,6 +1,10 @@
+/* Used for the whole menu bar */
 .nav_width {
     background-color:#4CAF50;
 }
+/* Used for each dropdown menu item button. White text on green background. Cursor turns into
+pointer to indicate its clickable
+*/
 .dropbtn {
     background-color: #4CAF50;
     color: white;
