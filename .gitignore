@@ -1,4 +1,7 @@
 *.pyc
 venv/
 *.swp
+keys.py
+*.db
+*.log
 

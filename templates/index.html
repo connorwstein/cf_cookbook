@@ -32,18 +32,38 @@
         {% endfor %}
         </ul>
         <ul class="nav navbar-nav navbar-right"> 
+        {% if current_user.is_authenticated %}
+            <li>
+                <div class="dropdown">
+                    <button class="dropbtn">
+                    Welcome, {{ current_user.username }}</button>
+                </div>
+            </li>
+            <li>
+                <div class="dropdown">
+                    <form method="get" action="{{ url_for('logout') }}">
+                    <button class="dropbtn" type="submit" style="padding-right: 30px" formaction="/logout">Logout</button>
+                    </form>
+                </div>
+            </li>
+        {% else %}
         {% for item in account %}
             <li>
             <div class="dropdown">
                 <!-- Need right padding because of bootstrap navbar right bug -->
+                <form method="get" action="{{ url_for('oauth_authorize', provider='facebook') }}">
                 {% if item=="Login" %}
-                <button class="dropbtn" style="padding-right: 30px">{{item}}</button>
+
+                <button type="submit" class="dropbtn" style="padding-right: 30px">{{item}}</button>
                 {% else %}
-                <button class="dropbtn">{{item}}</button>
+                <button type="submit" class="dropbtn">{{item}}</button>
                 {% endif %}
+                </form>
             </div>
             </li>
         {% endfor %}
+        {% endif %}
+        
         </ul>
     </div>
 </nav>
