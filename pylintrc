@@ -1,0 +1,4 @@
+[MESSAGES CONTROL]
+# :invalid-name (C0103): *Invalid %s name "%s"%s* 
+# :missing-docstring (C0111): *Missing %s docstring* 
+disable=C0103, C0111

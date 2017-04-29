@@ -6,64 +6,20 @@
 
 <link type="text/css" rel="stylesheet" href="/static/style.css"/>
 
-{% set menu_items = ["Home", "About", "Articles", "Book"] %}
-{% set account = ["Sign Up", "Login"] %}
+{% set menu_items = [("Receipes", "recipes"), 
+("About", "about")] %}
 
-<nav class="navbar navbar-static-top nav_width">
-    <div class="container-fullwidth ">
+<nav class="navbar navbar-default" style="background-color:#ccffb3">
+    <div class="container-fullwidth">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="{{ url_for("home") }}">Cashflow Cookbook</a>
+        </div>
         <ul class="nav navbar-nav navbar-left">
         {% for item in menu_items %}
             <li>
-            {% if item == "Articles" %}
-            <div class="dropdown">
-                <button class="dropbtn" >{{ item }}</button>
-                <div class="dropdown-content">
-                    <a href="#">Car</a>
-                    <a href="#">Home</a>
-                    <a href="#">Lifestyle</a>
-                </div> 
-            </div>
-            {% else %}
-            <div class="dropdown">
-                <button class="dropbtn" >{{ item }}</button>
-            </div>
-            {% endif %}
-        </li>
-        {% endfor %}
-        </ul>
-        <ul class="nav navbar-nav navbar-right"> 
-        {% if current_user.is_authenticated %}
-            <li>
-                <div class="dropdown">
-                    <button class="dropbtn">
-                    Welcome, {{ current_user.username }}</button>
-                </div>
-            </li>
-            <li>
-                <div class="dropdown">
-                    <form method="get" action="{{ url_for('logout') }}">
-                    <button class="dropbtn" type="submit" style="padding-right: 30px" formaction="/logout">Logout</button>
-                    </form>
-                </div>
-            </li>
-        {% else %}
-        {% for item in account %}
-            <li>
-            <div class="dropdown">
-                <!-- Need right padding because of bootstrap navbar right bug -->
-                <form method="get" action="{{ url_for('oauth_authorize', provider='facebook') }}">
-                {% if item=="Login" %}
-
-                <button type="submit" class="dropbtn" style="padding-right: 30px">{{item}}</button>
-                {% else %}
-                <button type="submit" class="dropbtn">{{item}}</button>
-                {% endif %}
-                </form>
-            </div>
+                <a href="{{ url_for(item[1]) }}">{{ item[0] }}</a>
             </li>
         {% endfor %}
-        {% endif %}
-        
         </ul>
     </div>
 </nav>
@@ -71,8 +27,13 @@
 {% endblock %}
 
 {% block content %}
-    <body style="background-color:#dcefdc">
-  <h1 align="center"> Cashflow Cookbook</h1>
-    <center><img align="middle" src="/static/construction.png" height=200 width=250></center>
-</body>
+<div class="container">
+    <div class="row">
+        <h1 align="center"> Cashflow Cookbook</h1>
+    </div>
+    <div class="help-block"></div>
+    <div class="row">
+        <p>{{ default_text }}</p>
+    </div>
+</div>
 {% endblock %}
