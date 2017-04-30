@@ -1,0 +1,11 @@
+{% extends "index.html" %}
+{% block title %}Articles{% endblock %}
+{% block content %}
+<div class="container">
+    {% for k, v in utensils.iteritems() %}
+    <div class="row">
+        <div class="col-sm-12"><a href="{{ v }}" download><h1>{{ k }}</h1></a></div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

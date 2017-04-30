@@ -2,13 +2,13 @@
 {% block title %}Articles{% endblock %}
 {% block content %}
 <div class="container">
+    {% for recipe in recipes %}
     <div class="row">
-      <div class="col-sm-6"><h2>Article 1 <h2></div>
-      <div class="col-sm-6"><h2>Article 2 <h2></div>
+        <div class="col-sm-12"><h2>{{ recipe.title }}<h2></div>
     </div>
     <div class="row">
-      <div class="col-sm-6"><h2>Article 3 <h2></div>
-      <div class="col-sm-4"><h2>Article 4 <h2></div>
+        <div class="col-sm-12"><h5>{{ recipe.text }}<h5></div>
     </div>
+    {% endfor %}
 </div>
 {% endblock %}

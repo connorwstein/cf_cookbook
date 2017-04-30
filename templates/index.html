@@ -6,8 +6,7 @@
 
 <link type="text/css" rel="stylesheet" href="/static/style.css"/>
 
-{% set menu_items = [("Receipes", "recipes"), 
-("About", "about")] %}
+{% set menu_items = [("About", "about"), ("Receipes", "recipes"), ("Utensils", "utensils")] %}
 
 <nav class="navbar navbar-default" style="background-color:#ccffb3">
     <div class="container-fullwidth">
@@ -29,11 +28,10 @@
 {% block content %}
 <div class="container">
     <div class="row">
-        <h1 align="center"> Cashflow Cookbook</h1>
+        <div class="col-sm-12">
+            <h1 align="center"> Why am I here ?</h1>
+        </div>
     </div>
     <div class="help-block"></div>
-    <div class="row">
-        <p>{{ default_text }}</p>
-    </div>
 </div>
 {% endblock %}

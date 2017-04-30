@@ -2,3 +2,8 @@
 # :invalid-name (C0103): *Invalid %s name "%s"%s* 
 # :missing-docstring (C0111): *Missing %s docstring* 
 disable=C0103, C0111
+# To resolve http://stackoverflow.com/questions/28193025/pylint-cant-find-sqlalchemy-query-member
+# because of the db.Model inheritance attributes will be missing until runtime 
+ignored-modules=flask_sqlalchemy
+ignored-classes=scoped_session
+

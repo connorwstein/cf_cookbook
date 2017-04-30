@@ -6,4 +6,3 @@ flaskfirst = "/var/www/cf_cookbook"
 if not flaskfirst in sys.path:
     sys.path.insert(0, flaskfirst)
 from cf_cookbook import app as application
-
