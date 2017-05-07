@@ -4,7 +4,7 @@ import logging
 from logging.handlers import RotatingFileHandler
 
 from flask_sqlalchemy import SQLAlchemy
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, flash, Response
 from flask_bootstrap import Bootstrap
 from flask_basicauth import BasicAuth
 from keys import user, pwd, db_location, log_location, app
@@ -46,10 +46,19 @@ def recipes():
 @app.route('/utensils')
 def utensils():
     app.logger.info("Utensils requested")
-    all_utensils = {'Debt sheet to organize what you owe' : '/home/ubuntu/CFCB_debt_sheet.xlsx',\
-                'Net worth sheet to track your finances' : '/home/ubuntu/CFCB_net_worth.xlsx',\
-                'Understanding debt scheduling' : '/home/ubuntu/CFCB_deb_sched.xlsx'}
+    all_utensils = {'Debt sheet to organize what you owe' : 'CFCB_debt_sheet.xlsx',\
+                'Net worth sheet to track your finances' : 'CFCB_net_worth.xlsx',\
+                'Understanding debt scheduling' : 'CFCB_debt_sched.xlsx'}
     return render_template('utensils.html', utensils=all_utensils)
+
+@app.route("/get_excel/<filename>")
+def get_excel(filename):
+    excelDownload = open("/var/www/cf_cookbook/static/%s" % filename,'rb').read()
+    return Response(
+        excelDownload,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-disposition":
+                 "attachment; filename=%s" % filename})
 
 @app.route('/about')
 def about():
@@ -73,10 +82,15 @@ def edit():
     if request.method == 'POST':
         if request.form['title'] and request.form['text']:
             add_new_recipe(request.form['title'], request.form['text'])
-        if request.form['title_to_delete']:
+        elif request.form['title_to_delete']:
             delete_recipe(request.form['title_to_delete'])
         return redirect(url_for('recipes'))
     return render_template('edit.html')
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
 
 def setup_logging():
     app.logger.setLevel(logging.DEBUG) # Without this you will see no logs
