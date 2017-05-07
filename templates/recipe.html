@@ -1,0 +1,17 @@
+{% extends "index.html" %}
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-sm-12"><h3>{{ recipe.title }}</h3></div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12"><h5><em>{{ recipe.date.split()[0] }}</em></h5></div>
+    </div>
+    <div class="help-block"></div>
+    <div class="row">
+        <div class="col-sm-12">
+        <pre style="font-family:inherit; font-size:inherit; line-height:inherit; background-color: #ffffff; padding: 0; margin: 0; white-space: pre-wrap; word-break:keep-all; border: none" >{{ recipe.text }}</pre>
+        </div>
+    </div>
+</div>
+{% endblock %}

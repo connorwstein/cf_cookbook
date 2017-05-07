@@ -1,6 +1,7 @@
 """Backend for cashflowcookbook.ca
 """
 import logging
+import time
 from logging.handlers import RotatingFileHandler
 
 from flask_sqlalchemy import SQLAlchemy
@@ -21,15 +22,18 @@ app.config['BASIC_AUTH_FORCE'] = True
 
 basic_auth = BasicAuth(app)
 db = SQLAlchemy(app)
+db_create = False
 
 class Recipe(db.Model): # pylint: disable=too-few-public-methods
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(80), unique=True)
     text = db.Column(db.String)
+    date = db.Column(db.String)
 
-    def __init__(self, title, text):
+    def __init__(self, title, text, date):
         self.title = title
         self.text = text
+        self.date = date
 
 @app.route('/')
 def home():
@@ -66,7 +70,8 @@ def about():
     return render_template('about.html')
 
 def add_new_recipe(title, text):
-    new_recipe = Recipe(title, text)
+    date = time.strftime("%d/%m/%Y %H:%M:%S")
+    new_recipe = Recipe(title, text, date)
     app.logger.info("New article upload %s", new_recipe)
     db.session.add(new_recipe)
     db.session.commit()
@@ -76,6 +81,12 @@ def delete_recipe(title):
     if to_delete:
         db.session.delete(to_delete)
         db.session.commit()
+
+@app.route('/full_recipe/<recipe_id>')
+def full_recipe(recipe_id):
+    recipe = Recipe.query.filter_by(id=recipe_id).first()
+    app.logger.info('%s' % recipe.text)
+    return render_template('recipe.html', recipe=recipe)
 
 @app.route('/edit', methods=['GET', 'POST'])
 def edit():
