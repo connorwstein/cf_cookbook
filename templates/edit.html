@@ -2,7 +2,7 @@
 {% block title %}Upload new article{% endblock %}
 {% block content %}
 <div class="container">
-    <form action="{{ url_for("edit") }}" method="Post">
+    <form action="{{ url_for("edit") }}" method="Post" enctype="multipart/form-data">
     <div class="row">
         <div class="col-sm-12"><h2>New Article<h2></div>
     </div>
@@ -19,6 +19,16 @@
             <div class="form-group">
                 <label for="text">Text:</label>
                 <textarea name="text" class="form-control" rows="30" cols="100"></textarea>
+            </div> 
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="form-group">
+			<label class="btn btn-default" for="my-file-selector">
+				<input name="recipe_img" id="my-file-selector" class="form-control" type="file" style="display:none;">Upload recipe image 
+			</label>
+			</label>
             </div> 
         </div>
     </div>

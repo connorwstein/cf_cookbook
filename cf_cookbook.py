@@ -2,12 +2,15 @@
 """
 import logging
 import time
+import os
 from logging.handlers import RotatingFileHandler
 
 from flask_sqlalchemy import SQLAlchemy
 from flask import Flask, render_template, request, redirect, url_for, flash, Response
 from flask_bootstrap import Bootstrap
 from flask_basicauth import BasicAuth
+from werkzeug.utils import secure_filename
+from flask_migrate import Migrate
 from keys import user, pwd, db_location, log_location, app
 
 app = Flask(__name__)
@@ -19,21 +22,30 @@ app.config['SQLALCHEMY_DATABASE_URI'] = db_location
 app.config['BASIC_AUTH_USERNAME'] = user
 app.config['BASIC_AUTH_PASSWORD'] = pwd
 app.config['BASIC_AUTH_FORCE'] = True
+app.config['UPLOAD_FOLDER'] = '/home/ubuntu/cf_cookbook/static'
+
+ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
 
 basic_auth = BasicAuth(app)
 db = SQLAlchemy(app)
-db_create = False
+migrate = Migrate(app, db)
 
 class Recipe(db.Model): # pylint: disable=too-few-public-methods
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(80), unique=True)
     text = db.Column(db.String)
     date = db.Column(db.String)
+    img_path = db.Column(db.String, default='')
 
-    def __init__(self, title, text, date):
+    def __init__(self, title, text, date, img_path=None):
         self.title = title
         self.text = text
         self.date = date
+        if img_path:
+            self.img_path = img_path
+
+    def __repr__(self):
+        return "<Recipe <Title %s> <Date %s> <Img %s>>" % (self.title, self.date, self.img_path)
 
 @app.route('/')
 def home():
@@ -44,8 +56,9 @@ def home():
 def recipes():
     app.logger.info("Recipes requested")
     all_recipes = Recipe.query.all()
+    all_recipes_and_imgs = [(r, os.path.basename(r.img_path) if r.img_path is not None else None) for r in all_recipes]
     app.logger.info("%s", str(all_recipes))
-    return render_template('recipes.html', recipes=all_recipes)
+    return render_template('recipes.html', recipes=all_recipes_and_imgs)
 
 @app.route('/utensils')
 def utensils():
@@ -69,9 +82,12 @@ def about():
     app.logger.info("About page requested")
     return render_template('about.html')
 
-def add_new_recipe(title, text):
+def add_new_recipe(title, text, path=None):
     date = time.strftime("%d/%m/%Y %H:%M:%S")
-    new_recipe = Recipe(title, text, date)
+    if path:
+        new_recipe = Recipe(title, text, date, img_path=path)
+    else:
+        new_recipe = Recipe(title, text, date)
     app.logger.info("New article upload %s", new_recipe)
     db.session.add(new_recipe)
     db.session.commit()
@@ -88,11 +104,24 @@ def full_recipe(recipe_id):
     app.logger.info('%s' % recipe.text)
     return render_template('recipe.html', recipe=recipe)
 
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 @app.route('/edit', methods=['GET', 'POST'])
 def edit():
     if request.method == 'POST':
-        if request.form['title'] and request.form['text']:
-            add_new_recipe(request.form['title'], request.form['text'])
+        app.logger.info(request)
+        app.logger.info(request.files)
+        if request.form['title'] and request.form['text'] and 'recipe_img' in request.files:
+            f = request.files['recipe_img'] 
+            if f and allowed_file(f.filename):
+                filename = secure_filename(f.filename)
+                path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                f.save(path)
+                add_new_recipe(request.form['title'], request.form['text'], path)
+            else:
+                app.logger.info("File not allowed to be uploaded")
         elif request.form['title_to_delete']:
             delete_recipe(request.form['title_to_delete'])
         return redirect(url_for('recipes'))
@@ -122,3 +151,4 @@ if __name__ == '__main__':
 else:
     setup_logging()
     db.create_all()
+    db.session.commit()

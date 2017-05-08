@@ -2,15 +2,14 @@
 {% block title %}Articles{% endblock %}
 {% block content %}
 <div class="container">
-    {% for recipe in recipes %}
     <div class="row">
-        <div class="col-sm-12"><h3><a href='{{ url_for('full_recipe', recipe_id=recipe.id) }}' style="text-decoration:none; color: inherit">{{ recipe.title }}</a></h3>
-        </div>
+        {% for recipe in recipes %}
+            <div class="col-sm-12 col-md-4">
+            <img src="static/{{ recipe[1] }}" style="max-width:70%">
+            <h3><a href='{{ url_for('full_recipe', recipe_id=recipe[0].id) }}' style="text-decoration:none; color: inherit">{{ recipe[0].title }}</a></h3>
+            {{ recipe[0].text[:200] }}...
+            </div>
+        {% endfor %}
     </div>
-    <div class="help-block"></div>
-    <div class="row">
-        <div class="col-sm-12">{{ recipe.text[:600] }}...</div>
-    </div>
-    {% endfor %}
 </div>
 {% endblock %}
