@@ -2,9 +2,9 @@
 
 {% block title %}Cashflow Cookbook{% endblock %}
 
-{% block navbar %}
+<link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"/>
 
-<link type="text/css" rel="stylesheet" href="/static/style.css"/>
+{% block navbar %}
 
 {% set menu_items = [("About", "about"), ("Recipes", "recipes"), ("Utensils", "utensils")] %}
 
@@ -22,7 +22,6 @@
         </ul>
     </div>
 </nav>
-
 {% endblock %}
 
 {% block content %}

@@ -70,6 +70,9 @@ def utensils():
 
 @app.route("/get_excel/<filename>")
 def get_excel(filename):
+    """This method was the only one that worked on both Safari and Chrome
+    (note that Safari does not support the download html tag)
+    """
     excelDownload = open("/var/www/cf_cookbook/static/%s" % filename,'rb').read()
     return Response(
         excelDownload,
@@ -95,6 +98,11 @@ def add_new_recipe(title, text, path=None):
 def delete_recipe(title):
     to_delete = Recipe.query.filter_by(title=title).first()
     if to_delete:
+#         try:
+#             # TODO: check if no other article is using that image, if so then delete it
+#             os.remove(to_delete.img_path)
+#         except:
+#             app.logger.info("Tried to delete an image which doesnt exist %s", to_delete.img_path)
         db.session.delete(to_delete)
         db.session.commit()
 
