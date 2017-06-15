@@ -4,10 +4,16 @@
 <div class="container">
     {% for k, v in utensils.iteritems() %}
     <div class="row">
-        <div class="col-sm-12">
-            <h3><a href="{{ url_for('get_excel', filename=v) }}" style="text-decoration:none; color:inherit">{{ k }}</a><h3>
+        <div class="col-sm-6">
+            <img src="static/{{ v['img'] }}" class="img-responsive">
+        </div>
+        <div class="col-sm-6">
+            <h4>{{ k }}</h4>
+            {{ v['text'] }}<br></br>
+            <button type="button" class="btn btn-default"><a href="{{ url_for('get_excel', filename=v['xlsx']) }}" style="text-decoration:none; color:inherit">Download</a></button>
         </div>
     </div>
+    <div class="help-block"></div>
     {% endfor %}
 </div>
 {% endblock %}

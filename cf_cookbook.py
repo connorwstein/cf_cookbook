@@ -63,9 +63,10 @@ def recipes():
 @app.route('/utensils')
 def utensils():
     app.logger.info("Utensils requested")
-    all_utensils = {'Debt sheet to organize what you owe' : 'CFCB_debt_sheet.xlsx',\
-                'Net worth sheet to track your finances' : 'CFCB_net_worth.xlsx',\
-                'Understanding debt scheduling' : 'CFCB_debt_sched.xlsx'}
+    all_utensils = {'Debt': {'xlsx': 'CFCB_debt_sheet.xlsx', 'img': 'CFCB_debt_sheet_img.png', 
+                             'text': 'Having debts lurking about in credit cards, student loans, mortgages, car loans and various other things is no fun. They slurp away at your bank account like a colony of vampire bats leaving you dry 3 days before each pay check. Before we whack them with a rolling pin, we need to get them all up where we can see them. Download the handy Cashflow Cookbook Debt Sheet, enter in your debts (yes all of them) and start to grind them down one a time, starting with the highest interest rate one. Use the savings from the Recipe section and Cashflow Cookbook to free up cash to eliminate these debts.'}, 
+                    'Net Worth':  {'xlsx': 'CFCB_net_worth.xlsx', 'img': 'CFCB_net_worth_img.png', 
+                             'text': 'Keeping a monthly budget is painful. Like a case of food poisoning from post-peak Thanksgiving leftovers. Easier to find new ways to save and apply them to debt reduction and increased savings. So how do you track all of this to see if it is working? By downloading the Cashflow Cookbook Net Worth Sheet. Fill in everything you owe and everything you own. Update it every few months and see how you are doing. Takes an hour or 2 a year and it will change the way you look at spending and saving.'}}
     return render_template('utensils.html', utensils=all_utensils)
 
 @app.route("/get_excel/<filename>")
@@ -84,6 +85,11 @@ def get_excel(filename):
 def about():
     app.logger.info("About page requested")
     return render_template('about.html')
+
+@app.route('/ingredients')
+def ingredients():
+    app.logger.info("Ingredient page requested")
+    return render_template('ingredients.html')
 
 def add_new_recipe(title, text, path=None):
     date = time.strftime("%d/%m/%Y %H:%M:%S")
