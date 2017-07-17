@@ -140,6 +140,8 @@ def edit():
                 app.logger.info("File not allowed to be uploaded")
         elif request.form['title_to_delete']:
             delete_recipe(request.form['title_to_delete'])
+        else:
+            app.logger.info("May be missing image file")
         return redirect(url_for('recipes'))
     return render_template('edit.html')
 
