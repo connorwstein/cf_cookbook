@@ -13,6 +13,8 @@ from werkzeug.utils import secure_filename
 from flask_migrate import Migrate
 from keys import user, pwd, db_location, log_location, app
 
+
+
 app = Flask(__name__)
 Bootstrap(app)
 BasicAuth(app)
@@ -154,15 +156,11 @@ def setup_logging():
     handler.setFormatter(formatter)
     app.logger.addHandler(handler)
 
-def main():
-    setup_logging()
-    db.drop_all()
-    db.create_all()
-    app.run(debug=True)
-
-if __name__ == '__main__':
-    main()
-else:
+def init():
     setup_logging()
     db.create_all()
     db.session.commit()
+
+if __name__ == "__main__":
+    init() 
+    app.run(debug=True, host="0.0.0.0")
