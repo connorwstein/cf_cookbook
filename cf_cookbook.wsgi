@@ -7,4 +7,7 @@ if not flaskfirst in sys.path:
     sys.path.insert(0, flaskfirst)
 import cf_cookbook
 cf_cookbook.init()
+import os
+import pwd
+print("Starting as {}".format(pwd.getpwuid(os.getuid()).pw_name))
 from cf_cookbook import app as application

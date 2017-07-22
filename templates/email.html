@@ -1,0 +1,23 @@
+{% extends "index.html" %}
+{% block title %}Email subscribers{% endblock %}
+{% block content %}
+<div class="container">
+    <form action="{{ url_for("email") }}" method="Post">
+    <div class="row">
+        <div class="col-sm-12">
+             <div class="form-group">
+                <label for="subject">Subject:</label>
+                <input name="subject" class="form-control" type="text">
+                <label for="text">Email text:</label>
+                <input name="text" class="form-control" type="text">
+             </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+			<button type="submit" class="btn btn-default">Send</button>
+		</div>
+    </div>
+    </form>       
+</div>
+{% endblock %}
