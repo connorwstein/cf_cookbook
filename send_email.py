@@ -70,5 +70,3 @@ def send_mail(send_from, send_to, subject, text, files=None,
         smtp.login(username, password)
     smtp.sendmail(send_from, send_to, msg.as_string())
     smtp.close()
-
-#send_mail('gord@cashflowcookbook.com', 'connor.stein2@gmail.com', 'Test subject' , 'Whatsup', username='gord@cashflowcookbook.com', password='Nursewood12$')
