@@ -21,7 +21,7 @@ class CashflowCookbookTest(unittest.TestCase):
 
     def test_landing_page(self):
         rv = self.app.get('/', headers=dict(Authorization='Basic ' + base64.b64encode("{0}:{1}".format(user,pwd))))
-        assert "Why am I here" in rv.data
+        assert "Welcome to the Cashflow" in rv.data
 
     def test_add_del_article(self):
         cf_cookbook.app.config["UPLOAD_FOLDER"] = os.path.join(os.getcwd(), "test_img")

@@ -1,0 +1,32 @@
+{% extends "bootstrap/base.html" %}
+{% block title %}Cashflow Cookbook{% endblock %}
+{% block scripts %}
+{{ super() }}
+<script>
+$(document).ready(function(){
+    $('#reply').on('shown.bs.collapse', function () {
+     document.getElementById('reply').scrollIntoView();
+    });
+});
+</script>
+{% endblock %}
+
+<link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"/>
+{% block navbar %}
+{% set menu_items = [("About", "about"), ("Appetizers", "recipes"), ("Utensils", "utensils"), ("Ingredients", "ingredients"), ("Subscribe", "subscribe")] %}
+<nav class="navbar navbar-default" style="background-color:#ccffb3">
+    <div class="container-fullwidth">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="{{ url_for("home") }}">Cashflow Cookbook</a>
+        </div>
+        <ul class="nav navbar-nav navbar-left">
+        {% for item in menu_items %}
+            <li>
+                <a href="{{ url_for(item[1]) }}">{{ item[0] }}</a>
+            </li>
+        {% endfor %}
+        </ul>
+    </div>
+</nav>
+{% endblock %}
+{% block content %}{% endblock %}

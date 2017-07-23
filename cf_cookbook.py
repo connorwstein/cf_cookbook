@@ -1,12 +1,13 @@
 """Backend for cashflowcookbook.ca
 """
-import logging
 import time
 import os
 import re
 import subprocess
-
+import logging
 from logging.handlers import RotatingFileHandler
+from datetime import datetime
+
 from flask_sqlalchemy import SQLAlchemy
 from flask import Flask, render_template, request, redirect, url_for, flash, Response
 from flask_bootstrap import Bootstrap
@@ -69,7 +70,7 @@ class Subscriber(db.Model):
     email = db.Column(db.String, unique=True)
 
     def __init__(self, email):
-        self.email = email 
+        self.email = email
 
     def __repr__(self):
         return "<Subscriber <Email %s>>" % (self.email)
@@ -88,7 +89,7 @@ def add_new_recipe(title, text, path):
 def delete_recipe(title):
     to_delete = Recipe.query.filter_by(title=title).first()
     if to_delete:
-        # Also clean up the image, guaranteed to be unique 
+        # Also clean up the image, guaranteed to be unique
         subprocess.call("rm -f {}".format(to_delete.img_path), shell=True)
         db.session.delete(to_delete)
         db.session.commit()
@@ -99,22 +100,24 @@ def basic_valid_email_check(email):
 @app.route('/')
 def home():
     app.logger.info("Home page requested")
-    return render_template('index.html')
+    recipes_sorted = sorted([(r, os.path.basename(r.img_path)) for r in Recipe.query.all()], key=lambda r: r[0].date)
+    num_recent = 3 
+    app.logger.info("{}".format(recipes_sorted))
+    return render_template('index.html', new_recipes=recipes_sorted[:num_recent+1])
 
 @app.route('/recipes')
 def recipes():
     app.logger.info("Recipes requested")
-    all_recipes = Recipe.query.all()
-    all_recipes_and_imgs = [(r, os.path.basename(r.img_path)) for r in all_recipes]
-    app.logger.info("%s", str(all_recipes))
+    all_recipes_and_imgs = [(r, os.path.basename(r.img_path)) for r in Recipe.query.all()]
+    app.logger.info("%s", str(all_recipes_and_imgs))
     return render_template('recipes.html', recipes=all_recipes_and_imgs)
 
 @app.route('/utensils')
 def utensils():
     app.logger.info("Utensils requested")
-    all_utensils = {'Debt': {'xlsx': 'CFCB_debt_sheet.xlsx', 'img': 'CFCB_debt_sheet_img.png', 
-                             'text': 'Having debts lurking about in credit cards, student loans, mortgages, car loans and various other things is no fun. They slurp away at your bank account like a colony of vampire bats leaving you dry 3 days before each pay check. Before we whack them with a rolling pin, we need to get them all up where we can see them. Download the handy Cashflow Cookbook Debt Sheet, enter in your debts (yes all of them) and start to grind them down one a time, starting with the highest interest rate one. Use the savings from the Recipe section and Cashflow Cookbook to free up cash to eliminate these debts.'}, 
-                    'Net Worth':  {'xlsx': 'CFCB_net_worth.xlsx', 'img': 'CFCB_net_worth_img.png', 
+    all_utensils = {'Debt': {'xlsx': 'CFCB_debt_sheet.xlsx', 'img': 'CFCB_debt_sheet_img.png',
+                             'text': 'Having debts lurking about in credit cards, student loans, mortgages, car loans and various other things is no fun. They slurp away at your bank account like a colony of vampire bats leaving you dry 3 days before each pay check. Before we whack them with a rolling pin, we need to get them all up where we can see them. Download the handy Cashflow Cookbook Debt Sheet, enter in your debts (yes all of them) and start to grind them down one a time, starting with the highest interest rate one. Use the savings from the Recipe section and Cashflow Cookbook to free up cash to eliminate these debts.'},
+                    'Net Worth':  {'xlsx': 'CFCB_net_worth.xlsx', 'img': 'CFCB_net_worth_img.png',
                              'text': 'Keeping a monthly budget is painful. Like a case of food poisoning from post-peak Thanksgiving leftovers. Easier to find new ways to save and apply them to debt reduction and increased savings. So how do you track all of this to see if it is working? By downloading the Cashflow Cookbook Net Worth Sheet. Fill in everything you owe and everything you own. Update it every few months and see how you are doing. Takes an hour or 2 a year and it will change the way you look at spending and saving.'}}
     return render_template('utensils.html', utensils=all_utensils)
 
@@ -140,10 +143,12 @@ def ingredients():
     app.logger.info("Ingredient page requested")
     return render_template('ingredients.html')
 
-@app.route('/full_recipe/<recipe_id>')
+@app.route('/full_recipe/<recipe_id>', methods=['GET', 'POST'])
 def full_recipe(recipe_id):
+    if request.method == 'POST':
+        app.logger.info("Received a comment {} --> {}".format(request.form['commentor_name'], request.form['comment']))
+        # TODO: Email this comment to be approved
     recipe = Recipe.query.filter_by(id=recipe_id).first()
-    app.logger.info('%s' % recipe.text)
     return render_template('recipe.html', recipe=recipe)
 
 @app.route('/edit', methods=['GET', 'POST'])
@@ -154,7 +159,7 @@ def edit():
         if request.form['title'] and request.form['text'] and 'recipe_img' in request.files:
             if request.form['title'] not in [r.title for r in Recipe.query.all()] and \
                 request.files['recipe_img'] not in [r.img_path for r in Recipe.query.all()]:
-                f = request.files['recipe_img'] 
+                f = request.files['recipe_img']
                 if f and allowed_file(f.filename):
                     filename = secure_filename(f.filename)
                     path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
@@ -172,21 +177,22 @@ def edit():
             flash("Successfully deleted article {}".format(request.form['title_to_delete']))
             delete_recipe(request.form['title_to_delete'])
         else:
+            flash("Image file is required!")
             app.logger.info("May be missing image file")
     return render_template('edit.html')
 
 @app.route('/email', methods=['GET', 'POST'])
 def email():
     if request.method == 'POST':
-        app.logger.info(request) 
-        app.logger.info(request.form['subject']) 
-        app.logger.info(request.form['text']) 
+        app.logger.info(request)
+        app.logger.info(request.form['subject'])
+        app.logger.info(request.form['text'])
         for sub in Subscriber.query.all():
             app.logger.info("Sub %s")
-        app.logger.info("Sending to {}".format([sub.email for sub in Subscriber.query.all()]))
+        app.logger.info("Sending to {}", [sub.email for sub in Subscriber.query.all()])
         try:
-            send_mail(email_user, [sub.email for sub in Subscriber.query.all()], 
-                      request.form['subject'] , request.form['text'], 
+            send_mail(email_user, [sub.email for sub in Subscriber.query.all()],
+                      request.form['subject'] , request.form['text'],
                       username=email_user, password=email_pass)
         except Exception as e:
             app.logger.info("Unable to send to some recipients {} --> {}".format(type(e), e))
@@ -195,8 +201,8 @@ def email():
 @app.route('/subscribe', methods=['GET', 'POST'])
 def subscribe():
     if request.method == 'POST':
-        app.logger.info(request) 
-        app.logger.info(request.form['email']) 
+        app.logger.info(request)
+        app.logger.info(request.form['email'])
         if request.form['email'] not in [sub.email for sub in Subscriber.query.all()]:
             if basic_valid_email_check(request.form['email']):
                 new_sub = Subscriber(request.form['email'])
@@ -212,6 +218,7 @@ def subscribe():
 
 @app.errorhandler(404)
 def page_not_found(e):
+    app.logger.error("Page not found {}", e)
     return render_template('404.html'), 404
 
 def setup_logging():
@@ -229,5 +236,5 @@ def init():
     db.session.commit()
 
 if __name__ == "__main__":
-    init() 
+    init()
     app.run(debug=True, host="0.0.0.0")

@@ -1,35 +1,25 @@
-{% extends "bootstrap/base.html" %}
-
-{% block title %}Cashflow Cookbook{% endblock %}
-
-<link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"/>
-{% block navbar %}
-
-{% set menu_items = [("About", "about"), ("Appetizers", "recipes"), ("Utensils", "utensils"), ("Ingredients", "ingredients"), ("Subscribe", "subscribe")] %}
-
-<nav class="navbar navbar-default" style="background-color:#ccffb3">
-    <div class="container-fullwidth">
-        <div class="navbar-header">
-            <a class="navbar-brand" href="{{ url_for("home") }}">Cashflow Cookbook</a>
-        </div>
-        <ul class="nav navbar-nav navbar-left">
-        {% for item in menu_items %}
-            <li>
-                <a href="{{ url_for(item[1]) }}">{{ item[0] }}</a>
-            </li>
-        {% endfor %}
-        </ul>
-    </div>
-</nav>
-{% endblock %}
-
+{% extends "base.html" %}
 {% block content %}
-<div class="container">
+<div class="container-fluid">
     <div class="row">
         <div class="col-sm-12">
-            <h1 align="center"> Why am I here ?</h1>
+            <h1 align="center">Welcome to the Cashflow Cookbook! <h1>
         </div>
     </div>
     <div class="help-block"></div>
+    <div class="row">
+        <div class="col-sm-12">
+            <h4 align="center">Recent articles<h4>
+        </div>
+    </div>
+    <div class="row">
+        {% for recipe in new_recipes %}
+            <div class="col-sm-12 col-md-4">
+            <img src="static/{{ recipe[1] }}" class="img-responsive">
+            <h3><a href='{{ url_for('full_recipe', recipe_id=recipe[0].id) }}' style="text-decoration:none; color: inherit">{{ recipe[0].title }}</a></h3>
+            {{ recipe[0].text[:200] }}...
+            </div>
+        {% endfor %}
+    </div>
 </div>
 {% endblock %}

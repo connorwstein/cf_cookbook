@@ -1,4 +1,4 @@
-{% extends "index.html" %}
+{% extends "base.html" %}
 {% block content %}
 <div class="container">
     <div class="row">
@@ -16,18 +16,20 @@
     <div class="help-block"></div>
     <div class="row">
         <div class="col-sm-12">
-            <button type="button" class="btn btn-default" data-toggle="collapse" data-target="#reply">Leave a reply!</button>
-             <div id="reply" class="form-group collapse">
+            <!--<button type="button" class="btn btn-default" data-toggle="collapse" data-target="#reply">Leave a reply!</button>-->
+            <button type="button" class="btn btn-default" data-toggle="collapse" href="#reply">Leave a reply!</button>
+			<section id="reply" class="collapse" data-toggle="collpase"> 
+            <div class="form-group">
+				<form action="{{ url_for("full_recipe", recipe_id=recipe.id) }}" method="Post">
                 <div class="help-block"></div>
                 <label for="commentor_name">Name:</label>
                 <input name="commentor_name" class="form-control" type="text">
                 <label for="comment">Comment:</label>
                 <textarea name="comment" rows=5 class="form-control" type="text"></textarea>
 			    <button type="submit" class="btn btn-default">Submit</button>
-             </div>
+				</form>
+            </div>
+			</section>
         <div>
     </div>
-</div>
-
-
 {% endblock %}

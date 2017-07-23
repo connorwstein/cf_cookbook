@@ -1,3 +1,5 @@
+"""Lifted directly from the web
+"""
 import smtplib, os
 from email.MIMEMultipart import MIMEMultipart
 from email.MIMEBase import MIMEBase
