@@ -8,15 +8,18 @@ import logging
 from logging.handlers import RotatingFileHandler
 from datetime import datetime
 
+from O365.inbox import Inbox
 from flask_sqlalchemy import SQLAlchemy
 from flask import Flask, render_template, request, redirect, url_for, flash, Response
 from flask_bootstrap import Bootstrap
 from flask_basicauth import BasicAuth
 from werkzeug.utils import secure_filename
 from flask_migrate import Migrate
+from bs4 import BeautifulSoup
 
 from keys import user, pwd, db_location, log_location, app, email_user, email_pass
 from send_email import send_mail
+
 
 app = Flask(__name__)
 Bootstrap(app)
@@ -24,6 +27,7 @@ BasicAuth(app)
 
 app.config['SECRET_KEY'] = app
 app.config['SQLALCHEMY_DATABASE_URI'] = db_location
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 app.config['BASIC_AUTH_USERNAME'] = user
 app.config['BASIC_AUTH_PASSWORD'] = pwd
 app.config['BASIC_AUTH_FORCE'] = True
@@ -34,46 +38,7 @@ ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
 basic_auth = BasicAuth(app)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
-
-class Recipe(db.Model): # pylint: disable=too-few-public-methods
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(80), unique=True)
-    text = db.Column(db.String)
-    date = db.Column(db.String)
-    img_path = db.Column(db.String, unique=True)
-    comments = db.relationship('Comment', backref='title', lazy='dynamic')
-
-    def __init__(self, title, text, date, img_path):
-        self.title = title
-        self.text = text
-        self.date = date
-        self.img_path = img_path
-
-    def get_comments(self):
-        return Comment.query.filter_by(recipe_id=recipe.id).order_by(Comment.timestamp.desc())
-
-    def __repr__(self):
-        return "<Recipe <Title %s> <Date %s> <Img %s>>" % (self.title, self.date, self.img_path)
-
-class Comment(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    body = db.Column(db.String(140))
-    timestamp = db.Column(db.DateTime)
-    recipe_id = db.Column(db.Integer, db.ForeignKey('recipe.id'))
-
-    def __repr__(self):
-        return '<Post %r>' % (self.body)
-
-
-class Subscriber(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String, unique=True)
-
-    def __init__(self, email):
-        self.email = email
-
-    def __repr__(self):
-        return "<Subscriber <Email %s>>" % (self.email)
+from models import Recipe, Subscriber, Comment
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -96,6 +61,35 @@ def delete_recipe(title):
 
 def basic_valid_email_check(email):
     return re.match(r'[^@]+@[^@]+\.[^@]+', email)
+
+@app.route('/update_comments')
+def update_comments():
+    """Use a cronjob to periodically curl this URL"""
+    i = Inbox((email_user, email_pass), getNow=True)
+    try:
+        i.getMessages()
+    except KeyError: 
+        app.logger.info("No new comments")
+    else:
+        for message in i.messages:
+            # Inbox filter doesn't seem to be working, filter manually
+            if message.getSubject() == 'Re: New comment from reader!':
+                app.logger.info("Found an approved comment")
+                soup = BeautifulSoup(message.getBody(), 'html.parser')
+                # Extract the message from the email body
+                # Example: <div class="PlainText">Reader Connor would like to comment the 
+                # following on recipe Cross Border Couch Potato: test</div>
+                message = soup.findAll("div", { "class" : "PlainText" })[0].contents[0]
+                app.logger.info("Message {}".format(message))
+                reader = re.search(r'Reader (.*) would', message).groups()[0]
+                comment = re.search(r': (.*)$', message).groups()[0]
+                recipe = re.search(r'recipe (.*):', message).groups()[0]
+                app.logger.info("Reader {}, Comment {}, Recipe {}".format(reader, comment, recipe))
+                new_comment = Comment(reader, comment, datetime.now(), Recipe.query.filter_by(title=recipe).first().id)
+                db.session.add(new_comment)
+                db.session.commit()
+                
+    return ('', 204)
 
 @app.route('/')
 def home():
@@ -148,8 +142,17 @@ def full_recipe(recipe_id):
     if request.method == 'POST':
         app.logger.info("Received a comment {} --> {}".format(request.form['commentor_name'], request.form['comment']))
         # TODO: Email this comment to be approved
+        # Need a script running in the background which checks email periodically for "New comment" with reply OK, then populate
+        # the DB accordingly
+        send_mail(email_user, email_user,
+                  "New comment from reader!", 
+                  ("Reader {} would like to comment the following on "
+                   "recipe {}: {}").format(request.form['commentor_name'], Recipe.query.filter_by(id=recipe_id).first().title,
+                  request.form['comment']),
+                  username=email_user, password=email_pass)
     recipe = Recipe.query.filter_by(id=recipe_id).first()
     return render_template('recipe.html', recipe=recipe)
+
 
 @app.route('/edit', methods=['GET', 'POST'])
 def edit():
@@ -180,6 +183,7 @@ def edit():
             flash("Image file is required!")
             app.logger.info("May be missing image file")
     return render_template('edit.html')
+
 
 @app.route('/email', methods=['GET', 'POST'])
 def email():

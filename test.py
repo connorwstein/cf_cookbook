@@ -19,9 +19,21 @@ class CashflowCookbookTest(unittest.TestCase):
         cf_cookbook.init()
         cf_cookbook.setup_logging()
 
-    def test_landing_page(self):
+    def test_home(self):
         rv = self.app.get('/', headers=dict(Authorization='Basic ' + base64.b64encode("{0}:{1}".format(user,pwd))))
         assert "Welcome to the Cashflow" in rv.data
+
+    def test_about(self):
+        rv = self.app.get('/about', headers=dict(Authorization='Basic ' + base64.b64encode("{0}:{1}".format(user,pwd))))
+        assert rv.status_code == 200
+
+    def test_appetizers(self):
+        rv = self.app.get('/recipes', headers=dict(Authorization='Basic ' + base64.b64encode("{0}:{1}".format(user,pwd))))
+        assert rv.status_code == 200
+
+    def test_utensils(self):
+        rv = self.app.get('/utensils', headers=dict(Authorization='Basic ' + base64.b64encode("{0}:{1}".format(user,pwd))))
+        assert rv.status_code == 200
 
     def test_add_del_article(self):
         cf_cookbook.app.config["UPLOAD_FOLDER"] = os.path.join(os.getcwd(), "test_img")
@@ -73,7 +85,6 @@ class CashflowCookbookTest(unittest.TestCase):
         c = conn.cursor()
         c.execute("select * from subscriber")
         db_results = c.fetchall()
-        print(db_results)
         assert "test@example.com" in str(db_results[0])
 
     def test_bad_email(self):
