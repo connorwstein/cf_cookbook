@@ -14,6 +14,17 @@
         </div>
     </div>
     <div class="help-block"></div>
+    <div class="help-block"></div>
+    <div class="row">
+        <div class="col-sm-12">
+            <ul class="list-group">
+            {% for comment in comments %}
+                <li class="list-group-item">{{ comment.user }} <br/><br/>{{ comment.body }}</li>    
+            {% endfor %}
+            </ul>
+        </div>
+    </div>
+    <div class="help-block"></div>
     <div class="row">
         <div class="col-sm-12">
             <!--<button type="button" class="btn btn-default" data-toggle="collapse" data-target="#reply">Leave a reply!</button>-->
@@ -26,6 +37,7 @@
                 <input name="commentor_name" class="form-control" type="text">
                 <label for="comment">Comment:</label>
                 <textarea name="comment" rows=5 class="form-control" type="text"></textarea>
+                <div class="help-block"></div>
 			    <button type="submit" class="btn btn-default">Submit</button>
 				</form>
             </div>

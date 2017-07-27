@@ -35,7 +35,7 @@ class Comment(db.Model):
         self.recipe_id = recipe_id
 
     def __repr__(self):
-        return '<Post %r>' % (self.body)
+        return '<Comment %s by user %s at %s for recipe %d>' % (self.body, self.user, self.timestamp, self.recipe_id)
 
 
 class Subscriber(db.Model):

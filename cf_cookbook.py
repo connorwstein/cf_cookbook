@@ -11,6 +11,7 @@ from datetime import datetime
 from O365.inbox import Inbox
 from flask_sqlalchemy import SQLAlchemy
 from flask import Flask, render_template, request, redirect, url_for, flash, Response
+from sqlalchemy import create_engine
 from flask_bootstrap import Bootstrap
 from flask_basicauth import BasicAuth
 from werkzeug.utils import secure_filename
@@ -59,6 +60,12 @@ def delete_recipe(title):
         db.session.delete(to_delete)
         db.session.commit()
 
+def delete_comment(comment_text):
+    to_delete = Comment.query.filter_by(body=comment_text).first()
+    if to_delete:
+        db.session.delete(to_delete)
+        db.session.commit()
+
 def basic_valid_email_check(email):
     return re.match(r'[^@]+@[^@]+\.[^@]+', email)
 
@@ -85,9 +92,12 @@ def update_comments():
                 comment = re.search(r': (.*)$', message).groups()[0]
                 recipe = re.search(r'recipe (.*):', message).groups()[0]
                 app.logger.info("Reader {}, Comment {}, Recipe {}".format(reader, comment, recipe))
-                new_comment = Comment(reader, comment, datetime.now(), Recipe.query.filter_by(title=recipe).first().id)
-                db.session.add(new_comment)
-                db.session.commit()
+                recipe_id = Recipe.query.filter_by(title=recipe).first().id
+                check_comment_already_added  = Comment.query.filter_by(user=reader, body=comment, recipe_id=recipe_id).first()
+                if not check_comment_already_added:
+                    new_comment = Comment(reader, comment, datetime.now(), recipe_id)
+                    db.session.add(new_comment)
+                    db.session.commit()
                 
     return ('', 204)
 
@@ -151,7 +161,9 @@ def full_recipe(recipe_id):
                   request.form['comment']),
                   username=email_user, password=email_pass)
     recipe = Recipe.query.filter_by(id=recipe_id).first()
-    return render_template('recipe.html', recipe=recipe)
+    comments = Comment.query.filter_by(recipe_id=recipe_id)
+    app.logger.info("{}".format(comments))
+    return render_template('recipe.html', recipe=recipe, comments=comments)
 
 
 @app.route('/edit', methods=['GET', 'POST'])
@@ -179,6 +191,9 @@ def edit():
         elif request.form['title_to_delete']:
             flash("Successfully deleted article {}".format(request.form['title_to_delete']))
             delete_recipe(request.form['title_to_delete'])
+        elif request.form['comment_to_delete']:
+            flash("Successfully deleted comment")
+            delete_comment(request.form['comment_to_delete'])
         else:
             flash("Image file is required!")
             app.logger.info("May be missing image file")
@@ -236,8 +251,9 @@ def setup_logging():
 
 def init():
     setup_logging()
-    db.create_all()
-    db.session.commit()
+    #db.create_all()
+    #app.logger.info(db.engine)
+    #db.session.commit()
 
 if __name__ == "__main__":
     init()
