@@ -10,19 +10,22 @@ $(document).ready(function(){
 });
 </script>
 {% endblock %}
-
-<link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"/>
+{% block styles %}
+{{super()}}
+<link rel="stylesheet"
+      href="{{url_for('static', filename='style.css')}}">
+{% endblock %}
 {% block navbar %}
 {% set menu_items = [("About", "about"), ("Appetizers", "recipes"), ("Utensils", "utensils"), ("Ingredients", "ingredients"), ("Subscribe", "subscribe")] %}
-<nav class="navbar navbar-default" style="background-color:#ccffb3">
+<nav class="navbar navbar-default">
     <div class="container-fullwidth">
         <div class="navbar-header">
-            <a class="navbar-brand" href="{{ url_for("home") }}">Cashflow Cookbook</a>
+            <a class="navbar-brand" href="{{ url_for("home") }}" style="color:white;">Cashflow Cookbook</a>
         </div>
         <ul class="nav navbar-nav navbar-left">
         {% for item in menu_items %}
             <li>
-                <a href="{{ url_for(item[1]) }}">{{ item[0] }}</a>
+                <a href="{{ url_for(item[1]) }}" style="color:white;">{{ item[0] }}</a>
             </li>
         {% endfor %}
         </ul>

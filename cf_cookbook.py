@@ -104,7 +104,7 @@ def update_comments():
 @app.route('/')
 def home():
     app.logger.info("Home page requested")
-    recipes_sorted = sorted([(r, os.path.basename(r.img_path)) for r in Recipe.query.all()], key=lambda r: r[0].date)
+    recipes_sorted = sorted([(r, os.path.basename(r.img_path), i) for i, r in enumerate(Recipe.query.all())], key=lambda r: r[0].date)
     num_recent = 3 
     app.logger.info("{}".format(recipes_sorted))
     return render_template('index.html', new_recipes=recipes_sorted[:num_recent+1])
@@ -237,7 +237,7 @@ def subscribe():
 
 @app.errorhandler(404)
 def page_not_found(e):
-    app.logger.error("Page not found {}", e)
+    app.logger.error("Page not found {}".format(e))
     return render_template('404.html'), 404
 
 def setup_logging():
