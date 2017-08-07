@@ -251,9 +251,8 @@ def setup_logging():
 
 def init():
     setup_logging()
-    #db.create_all()
-    #app.logger.info(db.engine)
-    #db.session.commit()
+    if app.testing is True:
+        db.create_all()
 
 if __name__ == "__main__":
     init()
