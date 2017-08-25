@@ -1,4 +1,2 @@
 # cf_cookbook
-Website for the book Cashflow Cookbook by Gord Stein
-
-www.cashflowcookbook.ca
+This was the backend for www.cashflowcookbook.ca before I started using wordpress like a normal person.
